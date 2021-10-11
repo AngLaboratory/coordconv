@@ -1,0 +1,57 @@
+{
+  "_from": "coordconv",
+  "_id": "coordconv@1.0.1",
+  "_inBundle": false,
+  "_integrity": "sha512-mVXsKtwI/yuw2ma3M4ijlOOLsvPL7zoYRoydq+/y+7N9pmggr42A/uTcmFl87MlurI6M2JHXS6Mr5/YyDimpwA==",
+  "_location": "/coordconv",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "coordconv",
+    "name": "coordconv",
+    "escapedName": "coordconv",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/coordconv/-/coordconv-1.0.1.tgz",
+  "_shasum": "beb361ab8c4ebc7e446b79f6d5c94aeee0f841de",
+  "_spec": "coordconv",
+  "_where": "/workspace/roadrunner",
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/AngLaboratory/coordconv/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Coordinate System Interchange Transformation Algorithm for TM,WTM,CONGNAMUL,WCONGNAMUL,KTM,WKTM,UTM,WGS84,BESSEL ",
+  "homepage": "https://github.com/AngLaboratory/coordconv#readme",
+  "keywords": [
+    "TM",
+    "KTM",
+    "UTM",
+    "CONGNAMUL",
+    "WGS84",
+    "BESSEL",
+    "WTM",
+    "WKTM",
+    "WCONGNAMUL",
+    "coord converter"
+  ],
+  "license": "MIT",
+  "main": "coordconv.js",
+  "name": "coordconv",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AngLaboratory/coordconv.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.1"
+}
