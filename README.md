@@ -16,20 +16,20 @@
 
 # How to Use
 ```javascript
-// let kk = coordconv(x, y, from, to)
-//
-// x : X axis of the coordinate system (ex:longitude)
-//     좌표계의 X축 (예:경도)
-// y : Y axis of the coordinate system (ex:latitude)
-//     좌표계의 Y축 (예:위도)
-// from : coordinate system code(from)
-//        변환 대상 좌표계 코드
-// to : coordinate system code(to)
-//      변환 할 좌표계 코드
-//
-// return : transformed coordinates x,y (Array)
-//          변환된 좌표의 x,y (배열)
+let kk = coordconv(x, y, from, to)
 ```
+
+* x : X axis of the coordinate system (ex:longitude)
+  - 좌표계의 X축 (예:경도)
+* y : Y axis of the coordinate system (ex:latitude)
+  - 좌표계의 Y축 (예:위도)
+* from : coordinate system code(from)
+  - 변환 대상 좌표계 코드
+* to : coordinate system code(to)
+  -  변환 할 좌표계 코드
+
+* return : transformed coordinates x,y (Array)
+  - 변환된 좌표의 x,y (배열)
 
 ```javascript
 let kk = coordconv(126.9876757,37.5611523,7,3)
@@ -44,11 +44,20 @@ console.log(kk) // [ 497278, 1128228 ]
 * WGS84 좌표를 다른 좌표로 변환하고, 다시 WGS84 좌표로 변환시키는 테스트코드
 
 ```javascript
-for ( let k =0 ; k < 9; k++ ) {
-    console.log(k)
-    let kk = coordconv(126.9876757,37.5611523,7,k)
-    coordconv(kk[0],kk[1],k,7)
-}
+<script type="text/javascript" src="coordconv.js"></script>
+<script>
+    const coordNames = ["TM","WTM","CONGNAMUL","WCONGNAMUL","KTM","WKTM","UTM","WGS84","BESSEL"]
+    let x = 126.9876757
+    let y = 37.5611523
+
+    for ( let k =0 ; k < 9; k++ ) {
+        console.log(k)
+        let xy = coordconv(x,y,7,k)
+        console.log(coordNames[7]+"("+x + "," + y +") => " + coordNames[k] + "(" + xy[0] + "," + xy[1] + ")")
+        let cxy = coordconv(xy[0],xy[1],k,7)
+        console.log(coordNames[k]+"("+xy[0] + "," + xy[1] +") => " + coordNames[7] + "(" + cxy[0] + "," + cxy[1] + ")")
+    }
+</script>
 ```
 ```
 [RESULT]
