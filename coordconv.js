@@ -1,89 +1,6 @@
 let coordconv = function (x, y, fromType, toType) {
     let vCoordConv = {
-        getTransCoord : (x, y, fromType, toType) => {
-            if ( fromType == toType ) return [x, y]
-            vCoordConv.init(x, y)
-            if ( fromType < 0 || fromType >= this.COORD_BASE.length ) return [x,y]
-            if ( toType   < 0 || toType   >= this.COORD_BASE.length ) return [x,y]
-
-            vCoordConv.convertCoord(fromType, toType)
-            //console.log(this.COORD_BASE[fromType].name+"("+x + "," + y +") => " + this.COORD_BASE[toType].name + "(" + this.x + "," + this.y + ")")
-            return [this.x, this.y]
-        },
-        convertCoord : (fromType, toType) => {
-            vCoordConv.from2bassel(fromType) // 1 from to bessel
-            vCoordConv.bassel2to(toType)     // 2 besell to to
-        },
-        from2bassel : fromType => {
-            let frombx = this.COORD_BASE[fromType].base.x
-            let fromby = this.COORD_BASE[fromType].base.y
-
-            if ( fromType == this.COORD_TM ) {
-                vCoordConv.convertTM2BESSEL(frombx, fromby);
-            } else if ( fromType == this.COORD_KTM ) {
-                vCoordConv.convertKTM2BESSEL();
-            } else if ( fromType == this.COORD_UTM ) {
-                vCoordConv.convertUTM2WGS(frombx, fromby);
-                vCoordConv.convertWGS2BESSEL();
-            } else if ( fromType == this.COORD_CONGNAMUL ) {
-                vCoordConv.convertCONG2BESSEL();
-            } else if ( fromType == this.COORD_WGS84 ) {
-                vCoordConv.convertWGS2BESSEL();
-            } else if ( fromType == this.COORD_BESSEL ) {
-            } else if ( fromType == this.COORD_WTM ) {
-                vCoordConv.convertWTM2WGS(frombx, fromby);
-                vCoordConv.convertWGS2BESSEL();
-            } else if ( fromType == this.COORD_WKTM ) {
-                vCoordConv.convertWKTM2WGS();
-                vCoordConv.convertWGS2BESSEL();
-            } else if ( fromType == this.COORD_WCONGNAMUL ) {
-                vCoordConv.convertWCONG2WGS();
-                vCoordConv.convertWGS2BESSEL();
-            }
-        },
-        bassel2to : toType => {
-            let tobx = this.COORD_BASE[toType].base.x
-            let toby = this.COORD_BASE[toType].base.y
-
-            if ( toType == this.COORD_TM ) {
-                vCoordConv.convertBESSEL2TM(tobx, toby);
-            } else if ( toType == this.COORD_KTM ) {
-                vCoordConv.convertBESSEL2KTM();
-            } else if ( toType == this.COORD_UTM ) {
-                vCoordConv.convertBESSEL2WGS();
-                vCoordConv.convertWGS2UTM(tobx, toby);
-            } else if ( toType == this.COORD_CONGNAMUL ) {
-                vCoordConv.convertBESSEL2CONG();
-            } else if ( toType == this.COORD_WGS84 ) {
-                vCoordConv.convertBESSEL2WGS();
-            } else if ( toType == this.COORD_BESSEL ) {
-                // 이것에 bassel?
-            } else if ( toType == this.COORD_WTM ) {
-                vCoordConv.convertBESSEL2WGS();
-                vCoordConv.convertWGS2WTM(tobx, toby);
-            } else if ( toType == this.COORD_WKTM ) {
-                vCoordConv.convertBESSEL2WGS();
-                vCoordConv.convertWGS2WKTM();
-            } else if ( toType == this.COORD_WCONGNAMUL ) {
-                vCoordConv.convertBESSEL2WGS();
-                vCoordConv.convertWGS2WCONG();
-            }
-        },
         init : (x, y) => {
-            this.m_imode = 0
-            this.m_ds = 0
-            this.m_kappa = 0
-            this.m_phi = 0
-            this.m_omega = 0
-            this.m_dz = 0
-            this.m_dy = 0
-            this.m_dx = 0
-
-            let BASE_TM  = { x:127, y:38 }
-            let BASE_KTM = { x:128, y:38 }
-            let BASE_UTM = { x:129, y: 0 }
-            let BASE_NON = { x: -1, y:-1 }
-
             this.COORD_TM         = 0
             this.COORD_WTM        = 1
             this.COORD_CONGNAMUL  = 2
@@ -95,106 +12,151 @@ let coordconv = function (x, y, fromType, toType) {
             this.COORD_BESSEL     = 8
 
             this.COORD_BASE = []
-            this.COORD_BASE[this.COORD_TM        ] = { name : "TM"        , code : this.COORD_TM        , base : BASE_TM  }
-            this.COORD_BASE[this.COORD_WTM       ] = { name : "WTM"       , code : this.COORD_WTM       , base : BASE_TM  }
-            this.COORD_BASE[this.COORD_CONGNAMUL ] = { name : "CONGNAMUL" , code : this.COORD_CONGNAMUL , base : BASE_TM  }
-            this.COORD_BASE[this.COORD_WCONGNAMUL] = { name : "WCONGNAMUL", code : this.COORD_WCONGNAMUL, base : BASE_TM  }
-            this.COORD_BASE[this.COORD_KTM       ] = { name : "KTM"       , code : this.COORD_KTM       , base : BASE_KTM }
-            this.COORD_BASE[this.COORD_WKTM      ] = { name : "WKTM"      , code : this.COORD_WKTM      , base : BASE_KTM }
-            this.COORD_BASE[this.COORD_UTM       ] = { name : "UTM"       , code : this.COORD_UTM       , base : BASE_UTM }
-            this.COORD_BASE[this.COORD_WGS84     ] = { name : "WGS84"     , code : this.COORD_WGS84     , base : BASE_NON }
-            this.COORD_BASE[this.COORD_BESSEL    ] = { name : "BESSEL"    , code : this.COORD_BESSEL    , base : BASE_NON }
+            this.COORD_BASE[this.COORD_TM        ] = { name : "TM"        , code : this.COORD_TM        }
+            this.COORD_BASE[this.COORD_WTM       ] = { name : "WTM"       , code : this.COORD_WTM       }
+            this.COORD_BASE[this.COORD_CONGNAMUL ] = { name : "CONGNAMUL" , code : this.COORD_CONGNAMUL }
+            this.COORD_BASE[this.COORD_WCONGNAMUL] = { name : "WCONGNAMUL", code : this.COORD_WCONGNAMUL}
+            this.COORD_BASE[this.COORD_KTM       ] = { name : "KTM"       , code : this.COORD_KTM       }
+            this.COORD_BASE[this.COORD_WKTM      ] = { name : "WKTM"      , code : this.COORD_WKTM      }
+            this.COORD_BASE[this.COORD_UTM       ] = { name : "UTM"       , code : this.COORD_UTM       }
+            this.COORD_BASE[this.COORD_WGS84     ] = { name : "WGS84"     , code : this.COORD_WGS84     }
+            this.COORD_BASE[this.COORD_BESSEL    ] = { name : "BESSEL"    , code : this.COORD_BESSEL    }
+        },
 
-            this.x = x;
-            this.y = y;
+        getTransCoord : (xy, fromType, toType) => {
+            if ( fromType == toType ) return xy
+            vCoordConv.init(x, y)
+            if ( fromType < 0 || fromType >= this.COORD_BASE.length ) return xy
+            if ( toType   < 0 || toType   >= this.COORD_BASE.length ) return xy
+            let cxy = vCoordConv.convertCoord(xy, fromType, toType)
+            return cxy
         },
-        convertBESSEL2KTM : () => {
-            vCoordConv.GP2TM(6377397.155, 0.0033427731799399794, 600000, 400000, 0.9999, 38, 128);
+        convertCoord : (xy, fromType, toType) => {
+            let cxy = vCoordConv.from2bassel(xy, fromType) // 1 from to bessel
+            return vCoordConv.bassel2to(cxy, toType)     // 2 besell to to
         },
-        convertBESSEL2CONG : () => {
-            vCoordConv.GP2TM(6377397.155, 0.0033427731799399794, 500000, 200000, 1, 38, 127.00289027777778);
-            vCoordConv.shiftIsland(true);
-        },
-        convertBESSEL2WGS : () => {
-            vCoordConv.setParameter(115.8, -474.99, -674.11, 1.16, -2.31, -1.63, -6.43, 1);
-            let rtn = vCoordConv.GP2WGP(this.y, this.x, 0, 6377397.155, 0.0033427731799399794);
-            this.x = rtn[1];
-            this.y = rtn[0];
-        },
-        convertKTM2BESSEL : () => {
-            vCoordConv.TM2GP(6377397.155, 0.0033427731799399794, 600000, 400000, 0.9999, 38, 128);
-        },
-        convertBESSEL2TM : (d, e) => {
-            vCoordConv.GP2TM(6377397.155, 0.0033427731799399794, 500000, 200000, 1, e, d + 0.0028902777777777776);
-        },
-        convertTM2BESSEL : (d, e) => {
-            vCoordConv.TM2GP(6377397.155, 0.0033427731799399794, 500000, 200000, 1, e, d + 0.0028902777777777776);
-        },
-        convertWGS2UTM : (d, e) => {
-            vCoordConv.setParameter(115.8, -474.99, -674.11, 1.16, -2.31, -1.63, -6.43, 1);
-            vCoordConv.GP2TM(6378137, 0.0033528106647474805, 0, 500000, 0.9996, e, d);
-        },
-        convertWGS2WTM : (d, e) => {
-            vCoordConv.GP2TM(6378137, 0.0033528106647474805, 500000, 200000, 1, e, d);
-        },
-        convertWGS2WKTM : () => {
-            vCoordConv.GP2TM(6378137, 0.0033528106647474805, 600000, 400000, 0.9999, 38, 128);
-        },
-        convertWGS2WCONG : () => {
-            vCoordConv.GP2TM(6378137, 0.0033528106647474805, 500000, 200000, 1, 38, 127);
-            this.x = Math.round(this.x * 2.5);
-            this.y = Math.round(this.y * 2.5);
-        },
-        convertUTM2WGS : (d, e) => {
-            vCoordConv.setParameter(115.8, -474.99, -674.11, 1.16, -2.31, -1.63, -6.43, 1);
-            vCoordConv.TM2GP(6378137, 0.0033528106647474805, 0, 500000, 0.9996, e, d);
-        },
-        convertWGS2BESSEL : () => {
-            vCoordConv.setParameter(115.8, -474.99, -674.11, 1.16, -2.31, -1.63, -6.43, 1);
-            let rtn = vCoordConv.WGP2GP(this.y, this.x, 0, 6377397.155, 0.0033427731799399794);
-            this.x = rtn[1];
-            this.y = rtn[0];
-        },
-        convertCONG2BESSEL : () => {
-            vCoordConv.shiftIsland(false);
-            vCoordConv.TM2GP(6377397.155, 0.0033427731799399794, 500000, 200000, 1, 38, 127.00289027777778);
-        },
-        convertWTM2WGS : (d, e) => {
-            vCoordConv.TM2GP(6378137, 0.0033528106647474805, 500000, 200000, 1, e, d);
-        },
-        convertWKTM2WGS : () => {
-            vCoordConv.TM2GP(6378137, 0.0033528106647474805, 600000, 400000, 0.9999, 38, 128);
-        },
-        convertWCONG2WGS : () => {
-            this.x /= 2.5;
-            this.y /= 2.5;
-            vCoordConv.TM2GP(6378137, 0.0033528106647474805, 500000, 200000, 1, 38, 127);
-        },
-        WGP2GP : (a, b, d, e, h) => {
-            let rtn = vCoordConv.WGP2WCTR(a, b, d);
-            if ( vCoordConv.m_imode == 1) {
-                rtn = vCoordConv.TransMolod(rtn[0], rtn[1], rtn[2]);
-            } else {
-                rtn = vCoordConv.TransBursa(rtn[0], rtn[1], rtn[2]);
+        from2bassel : (xy, fromType) => {
+            if ( fromType == this.COORD_TM ) {
+                return vCoordConv.convertTM2BESSEL(xy);
+            } else if ( fromType == this.COORD_WTM ) {
+                let cxy = vCoordConv.convertWTM2WGS(xy);
+                return vCoordConv.convertWGS2BESSEL(cxy);
+            } else if ( fromType == this.COORD_CONGNAMUL ) {
+                return vCoordConv.convertCONG2BESSEL(xy);
+            } else if ( fromType == this.COORD_WCONGNAMUL ) {
+                let cxy = vCoordConv.convertWCONG2WGS(xy);
+                return vCoordConv.convertWGS2BESSEL(cxy);
+            } else if ( fromType == this.COORD_KTM ) {
+                return vCoordConv.convertKTM2BESSEL(xy);
+            } else if ( fromType == this.COORD_WKTM ) {
+                let cxy = vCoordConv.convertWKTM2WGS(xy);
+                return vCoordConv.convertWGS2BESSEL(cxy);
+            } else if ( fromType == this.COORD_UTM ) {
+                let cxy = vCoordConv.convertUTM2WGS(xy);
+                return vCoordConv.convertWGS2BESSEL(cxy);
+            } else if ( fromType == this.COORD_WGS84 ) {
+                return vCoordConv.convertWGS2BESSEL(xy);
+            } else if ( fromType == this.COORD_BESSEL ) {
+                return xy
             }
+        },
+        bassel2to : (xy, toType) => {
+            if ( toType == this.COORD_TM ) {
+                return vCoordConv.convertBESSEL2TM(xy);
+            } else if ( toType == this.COORD_WTM ) {
+                let cxy = vCoordConv.convertBESSEL2WGS(xy);
+                return vCoordConv.convertWGS2WTM(cxy);
+            } else if ( toType == this.COORD_CONGNAMUL ) {
+                return vCoordConv.convertBESSEL2CONG(xy);
+            } else if ( toType == this.COORD_WCONGNAMUL ) {
+                let cxy = vCoordConv.convertBESSEL2WGS(xy);
+                return vCoordConv.convertWGS2WCONG(cxy);
+            } else if ( toType == this.COORD_KTM ) {
+                return vCoordConv.convertBESSEL2KTM(xy);
+            } else if ( toType == this.COORD_WKTM ) {
+                let cxy = vCoordConv.convertBESSEL2WGS(xy);
+                return vCoordConv.convertWGS2WKTM(cxy);
+            } else if ( toType == this.COORD_UTM ) {
+                let cxy = vCoordConv.convertBESSEL2WGS(xy);
+                return vCoordConv.convertWGS2UTM(cxy);
+            } else if ( toType == this.COORD_WGS84 ) {
+                return vCoordConv.convertBESSEL2WGS(xy);
+            } else if ( toType == this.COORD_BESSEL ) {
+                // 이것에 bassel?
+                return xy
+            }
+        },
+        convertBESSEL2KTM : xy => {
+            return vCoordConv.GP2TM(xy, 6377397.155, 0.0033427731799399794, 600000, 400000, 0.9999, 38, 128);
+        },
+        convertBESSEL2CONG : xy => {
+            let cxy = vCoordConv.GP2TM(xy, 6377397.155, 0.0033427731799399794, 500000, 200000, 1, 38, 127.00289027777778);
+            return vCoordConv.shiftIsland(cxy, true);
+        },
+        convertBESSEL2WGS : xy => {
+            return vCoordConv.GP2WGP(xy, 0, 6377397.155, 0.0033427731799399794);
+        },
+        convertKTM2BESSEL : xy => {
+            return vCoordConv.TM2GP(xy, 6377397.155, 0.0033427731799399794, 600000, 400000, 0.9999, 38, 128);
+        },
+        convertBESSEL2TM : xy => {
+            return vCoordConv.GP2TM(xy, 6377397.155, 0.0033427731799399794, 500000, 200000, 1, 38, 127.0028902777777777776);
+        },
+        convertTM2BESSEL : xy => {
+            return vCoordConv.TM2GP(xy, 6377397.155, 0.0033427731799399794, 500000, 200000, 1, 38, 127.0028902777777777776);
+        },
+        convertWGS2UTM : xy => {
+            return vCoordConv.GP2TM(xy, 6378137, 0.0033528106647474805, 0, 500000, 0.9996, 0, 129);
+        },
+        convertWGS2WTM : xy => {
+            return vCoordConv.GP2TM(xy, 6378137, 0.0033528106647474805, 500000, 200000, 1, 38, 127);
+        },
+        convertWGS2WKTM : xy => {
+            return vCoordConv.GP2TM(xy, 6378137, 0.0033528106647474805, 600000, 400000, 0.9999, 38, 128);
+        },
+        convertWGS2WCONG : xy => {
+            let cxy = vCoordConv.GP2TM(xy, 6378137, 0.0033528106647474805, 500000, 200000, 1, 38, 127);
+            return [ Math.round(cxy[0] * 2.5), Math.round(cxy[1] * 2.5) ];
+        },
+        convertUTM2WGS : xy => {
+            return vCoordConv.TM2GP(xy, 6378137, 0.0033528106647474805, 0, 500000, 0.9996, 0, 129);
+        },
+        convertWGS2BESSEL : xy => {
+            return vCoordConv.WGP2GP(xy, 0, 6377397.155, 0.0033427731799399794);
+        },
+        convertCONG2BESSEL : xy => {
+            let cxy = vCoordConv.shiftIsland(xy, false);
+            return vCoordConv.TM2GP(cxy, 6377397.155, 0.0033427731799399794, 500000, 200000, 1, 38, 127.00289027777778);
+        },
+        convertWTM2WGS : xy => { 
+            return vCoordConv.TM2GP(xy, 6378137, 0.0033528106647474805, 500000, 200000, 1, 38, 127);
+        },
+        convertWKTM2WGS : xy => {
+            return vCoordConv.TM2GP(xy, 6378137, 0.0033528106647474805, 600000, 400000, 0.9999, 38, 128);
+        },
+        convertWCONG2WGS : xy => {
+            xy = [ xy[0] / 2.5, xy[1] / 2.5 ];
+            return vCoordConv.TM2GP(xy, 6378137, 0.0033528106647474805, 500000, 200000, 1, 38, 127);
+        },
+        WGP2GP : (xy, d, e, h) => {
+            let rtn = vCoordConv.WGP2WCTR(xy, d);
+            rtn = vCoordConv.TransMolod(rtn[0], rtn[1], rtn[2]);
             return vCoordConv.CTR2GP(rtn[0], rtn[1], rtn[2], e, h);
         },
-        WGP2WCTR : (a, b, d ) => {
-            return vCoordConv.GP2CTR(a, b, d, 6378137, 0.0033528106647474805);
+        WGP2WCTR : (xy, d) => {
+            return vCoordConv.GP2CTR(xy, d, 6378137, 0.0033528106647474805);
         },
-        GP2WGP : (a, b, d, e, h) => {
-            let rtn = vCoordConv.GP2CTR(a, b, d, e, h);
-            if ( vCoordConv.m_imode == 1) {
-                rtn = vCoordConv.InverseMolod(rtn[0], rtn[1], rtn[2]);
-            } else {
-                rtn = vCoordConv.InverseBursa(rtn[0], rtn[1], rtn[2]);
-            }
+        GP2WGP : (xy, d, e, h) => {
+            let rtn = vCoordConv.GP2CTR(xy, d, e, h);
+            rtn = vCoordConv.InverseMolod(rtn[0], rtn[1], rtn[2]);
             return vCoordConv.WCTR2WGP(rtn[0], rtn[1], rtn[2]);
         },
-        GP2CTR : ( a, b, d, e, h) => {
+        GP2CTR : ( xy, d, e, h) => {
+            let a = xy[1]
+            let b = xy[0]
+            let c = Math.atan(1) / 45
             let m = h;
             if ( m > 1 ) m = 1 / m;
-            let c = Math.atan(1) / 45
             let l = a * c;
             c *= b;
             m = 1 / m;
@@ -207,30 +169,35 @@ let coordconv = function (x, y, fromType, toType) {
                     , (Math.pow(m, 2) / Math.pow(e, 2) * o + d) * Math.sin(l) ]
         },
         InverseMolod : ( a, b, d ) => {
-            let e = (a - this.m_dx) * (1 + this.m_ds);
-            let h = (b - this.m_dy) * (1 + this.m_ds);
-            let c = (d - this.m_dz) * (1 + this.m_ds);
-            return [ 1 / (1 + this.m_ds) * (e - this.m_kappa * h + this.m_phi * c)
-                   , 1 / (1 + this.m_ds) * (this.m_kappa * e + h - this.m_omega * c)
-                   , 1 / (1 + this.m_ds) * (-1 * this.m_phi * e + this.m_omega * h + c) ]
-        },
-        InverseBursa : ( a, b, d ) => {
-            let e = a - this.m_dx
-            let h = b - this.m_dy
-            let c = d - this.m_dz
-            return [ 1 / (1 + this.m_ds) * (e - this.m_kappa * h + this.m_phi * c)
-                   , 1 / (1 + this.m_ds) * (this.m_kappa * e + h - this.m_omega * c)
-                   , 1 / (1 + this.m_ds) * (-1 * this.m_phi * e + this.m_omega * h + c) ]
+            const m = Math.atan(1) / 45;
+            let m_dx = 115.8;
+            let m_dy = -474.99;
+            let m_dz = -674.11;
+            let m_omega = 1.16 / 3600 * m;
+            let m_phi = -2.31 / 3600 * m;
+            let m_kappa = -1.63 / 3600 * m; 
+            let m_ds = -6.43 * 1.0E-6;
+
+            let e = (a - m_dx) * (1 + m_ds);
+            let h = (b - m_dy) * (1 + m_ds);
+            let c = (d - m_dz) * (1 + m_ds);
+            return [ 1 / (1 + m_ds) * (e - m_kappa * h + m_phi * c)
+                   , 1 / (1 + m_ds) * (m_kappa * e + h - m_omega * c)
+                   , 1 / (1 + m_ds) * (-1 * m_phi * e + m_omega * h + c) ]
         },
         TransMolod : ( a, b, d ) => {
-            return [ a + (1 + this.m_ds) * (this.m_kappa * b - this.m_phi * d) + this.m_dx
-                   , b + (1 + this.m_ds) * (-1 * this.m_kappa * a + this.m_omega * d) + this.m_dy
-                   , d + (1 + this.m_ds) * (this.m_phi * a - this.m_omega * b) + this.m_dz ]
-        },
-        TransBursa : ( a, b, d ) => {
-            return [ (1 + this.m_ds) * (a + this.m_kappa * b - this.m_phi * d) + this.m_dx
-                   , (1 + this.m_ds) * (-1 * this.m_kappa * a + b + this.m_omega * d) + this.m_dy
-                   , (1 + this.m_ds) * (this.m_phi * a - this.m_omega * b + d) + this.m_dz ]
+            const m = Math.atan(1) / 45;
+            let m_dx = 115.8;
+            let m_dy = -474.99;
+            let m_dz = -674.11;
+            let m_omega = 1.16 / 3600 * m;
+            let m_phi = -2.31 / 3600 * m;
+            let m_kappa = -1.63 / 3600 * m; 
+            let m_ds = -6.43 * 1.0E-6;
+
+            return [ a + (1 + m_ds) * (m_kappa * b - m_phi * d) + m_dx
+                   , b + (1 + m_ds) * (-1 * m_kappa * a + m_omega * d) + m_dy
+                   , d + (1 + m_ds) * (m_phi * a - m_omega * b) + m_dz ]
         },
         WCTR2WGP : ( a, b, d ) => {
             return vCoordConv.CTR2GP(a, b, d, 6378137, 0.0033528106647474805);
@@ -245,10 +212,7 @@ let coordconv = function (x, y, fromType, toType) {
             m = Math.atan(b / a);
             let A = Math.sqrt(a * a + b * b);
             let u = e;
-            let bb = 0
-            let w = 0
-            let l = 0
-            let f = 0
+            let l = 0, f = 0, bb = 0, w = 0;
             do {
                 ++bb;
                 w = Math.pow(Math.pow(o, 2) / Math.pow(e, 2) * u + w, 2) - Math.pow(d, 2);
@@ -262,14 +226,14 @@ let coordconv = function (x, y, fromType, toType) {
                 f = l;
             } while (bb <= 30);
 
-            let rtn = [ l / c, m / c ];
-            if ( a < 0 ) rtn[1] += 180
-            if ( rtn[1] < 0 ) rtn[1] += 360
-            return rtn;
+            let rtn = [ m / c, l / c ];
+            if ( a < 0 ) rtn[0] += 180
+            if ( rtn[0] < 0 ) rtn[0] += 360
+            return rtn
         },
-        GP2TM : ( d, e, h, f, c, l, m) => {
-            let a = this.y;
-            let b = this.x;
+        GP2TM : (xy, d, e, h, f, c, l, m) => {
+            let a = xy[1]
+            let b = xy[0]
             let B = f;
             let w = e;
             if ( w > 1 ) w = 1 / w;
@@ -303,17 +267,18 @@ let coordconv = function (x, y, fromType, toType) {
             J = G * H * Math.pow(u, 5) * c * (61 - 58 * Math.pow(A, 2) + Math.pow(A, 4) + 270 * w - 330 * Math.pow(A, 2) * w + 445 * Math.pow(w, 2) + 324 * Math.pow(w, 3) - 680 * Math.pow(A, 2) * Math.pow(w, 2) + 88 * Math.pow(w, 4) - 600 * Math.pow(A, 2) * Math.pow(w, 3) - 192 * Math.pow(A, 2) * Math.pow(w, 4)) / 720
             H = G * H * Math.pow(u, 7) * c * (1385 - 3111 * Math.pow(A, 2) + 543 * Math.pow(A, 4) - Math.pow(A, 6)) / 40320
             o = o + Math.pow(D, 2) * E + Math.pow(D, 4) * I + Math.pow(D, 6) * J + Math.pow(D, 8) * H;
-            this.y = o - z + h;
+            let y = o - z + h;
             o = G * u * c;
             z = G * Math.pow(u, 3) * c * (1 - Math.pow(A, 2) + w) / 6
             w = G * Math.pow(u, 5) * c * (5 - 18 * Math.pow(A, 2) + Math.pow(A, 4) + 14 * w - 58 * Math.pow(A, 2) * w + 13 * Math.pow(w, 2) + 4 * Math.pow(w, 3) - 64 * Math.pow(A, 2) * Math.pow(w, 2) - 25 * Math.pow(A, 2) * Math.pow(w, 3)) / 120
             u = G * Math.pow(u, 7) * c * (61 - 479 * Math.pow(A, 2) + 179 * Math.pow(A, 4) - Math.pow(A, 6)) / 5040
-            this.x = B + D * o + Math.pow(D, 3) * z + Math.pow(D, 5) * w + Math.pow(D, 7) * u;
+            let x = B + D * o + Math.pow(D, 3) * z + Math.pow(D, 5) * w + Math.pow(D, 7) * u;
+            return [ x, y ];
         },
-        TM2GP : ( d, e, h, f, c, l, m) => {
+        TM2GP : ( xy, d, e, h, f, c, l, m) => {
             let u = e;
-            let a = this.y;
-            let b = this.x;
+            let a = xy[1]
+            let b = xy[0]
             if ( u > 1 ) u = 1 / u;
             let A = f;
             let w = Math.atan(1) / 45
@@ -358,21 +323,9 @@ let coordconv = function (x, y, fromType, toType) {
             z = (61 + 662 * Math.pow(E, 2) + 1320 * Math.pow(E, 4) + 720 * Math.pow(E, 6)) / (5040 * Math.pow(G, 7) * z * Math.pow(c, 7));
             A = A * B - Math.pow(A, 3) * H + Math.pow(A, 5) * u - Math.pow(A, 7) * z;
             D += A;
-            this.x = D / w;
-            this.y = o / w;
+            return [ D / w , o / w]
         },
-        setParameter : ( a, b, d, e, h, x, y, l) => {
-            let m = Math.atan(1) / 45
-            this.m_dx = a
-            this.m_dy = b
-            this.m_dz = d
-            this.m_omega = e / 3600 * m
-            this.m_phi   = h / 3600 * m
-            this.m_kappa = x / 3600 * m
-            this.m_ds    = y * 1.0E-6
-            this.m_imode = l
-        },
-        shiftIsland : (pTF) => {
+        shiftIsland : (xy, pTF) => {
             let x, y
             let rectArray1  = [ { x : 112500, y : -50000, w : 33500, h : 53000 },
                                 { x : 146000, y : -50000, w : 54000, h : 58600 },
@@ -384,18 +337,18 @@ let coordconv = function (x, y, fromType, toType) {
                 let e = 0, h = 0
                 let deltaValue1 = [ [ 0,  50000 ], [ 0,  50000 ], [ 0,  10000 ], [ -70378, -136 ], [ -144738, -2161 ], [  23510, -111 ] ]
                 for ( var i = 0; i < rectArray1.length; ++i ) {
-                    if ( this.x - rectArray1[i].x >= 0 && this.x - rectArray1[i].x <= rectArray1[i].w
-                      && this.y - rectArray1[i].y >= 0 && this.y - rectArray1[i].y <= rectArray1[i].h ) {
+                    if ( xy[0] - rectArray1[i].x >= 0 && xy[0] - rectArray1[i].x <= rectArray1[i].w
+                      && xy[1] - rectArray1[i].y >= 0 && xy[1] - rectArray1[i].y <= rectArray1[i].h ) {
                         e += deltaValue1[i][0];
                         h += deltaValue1[i][1];
                         break;
                     }
                 }
-                x = (this.x + e) * 2.5 + 0.5
-                y = (this.y + h) * 2.5 + 0.5
+                x = (xy[0] + e) * 2.5 + 0.5
+                y = (xy[1] + h) * 2.5 + 0.5
             } else {
-                x = this.x / 2.5;
-                y = this.y / 2.5;
+                x = xy[0] / 2.5;
+                y = xy[1] / 2.5;
                 let deltaValue2 = [ [ 0, -50000 ], [ 0, -50000 ], [ 0, -10000 ], [  70378,  136 ], [  144738,  2161 ], [ -23510,  111 ] ]
                 for ( var i = 0; i < rectArray1.length; ++i ) {
                     if ( x - rectArray1[i].x >= 0 && x - rectArray1[i].x <= rectArray1[i].w
@@ -406,10 +359,9 @@ let coordconv = function (x, y, fromType, toType) {
                     }
                 }
             }
-            this.x = x
-            this.y = y
+            return [x,y]
         }
     }
-    return vCoordConv.getTransCoord(x, y, fromType, toType)
+    return vCoordConv.getTransCoord([x, y], fromType, toType)
 }
 try{module.exports = coordconv} catch(e){}
