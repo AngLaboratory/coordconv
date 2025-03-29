@@ -1,6 +1,6 @@
 {
   "_from": "coordconv",
-  "_id": "coordconv@1.0.1",
+  "_id": "coordconv@1.0.2",
   "_inBundle": false,
   "_integrity": "sha512-mVXsKtwI/yuw2ma3M4ijlOOLsvPL7zoYRoydq+/y+7N9pmggr42A/uTcmFl87MlurI6M2JHXS6Mr5/YyDimpwA==",
   "_location": "/coordconv",
@@ -19,7 +19,7 @@
     "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/coordconv/-/coordconv-1.0.1.tgz",
+  "_resolved": "https://registry.npmjs.org/coordconv/-/coordconv-1.0.2.tgz",
   "_shasum": "beb361ab8c4ebc7e446b79f6d5c94aeee0f841de",
   "_spec": "coordconv",
   "_where": "/workspace/roadrunner",
@@ -41,6 +41,9 @@
     "WTM",
     "WKTM",
     "WCONGNAMUL",
+    "GoogleMap",
+    "NaverMap",
+    "KakaoMap",
     "coord converter"
   ],
   "license": "MIT",
@@ -53,5 +56,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "1.0.1"
+  "version": "1.0.2"
 }
