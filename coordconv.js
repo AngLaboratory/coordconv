@@ -21,6 +21,14 @@ let coordconv = function (x, y, fromType, toType) {
             this.COORD_BASE[this.COORD_UTM       ] = { name : "UTM"       , code : this.COORD_UTM       }
             this.COORD_BASE[this.COORD_WGS84     ] = { name : "WGS84"     , code : this.COORD_WGS84     }
             this.COORD_BASE[this.COORD_BESSEL    ] = { name : "BESSEL"    , code : this.COORD_BESSEL    }
+
+            this.a6377397 = [6377397.155, 0.0033427731799399794]
+            this.a6378137 = [6378137    , 0.0033528106647474805]
+
+            this.g51 = [500000, 200000, 1     , 38, 127.0028902777777777776]
+            this.g52 = [500000, 200000, 1     , 38, 127]
+            this.g6  = [600000, 400000, 0.9999, 38, 128]
+            this.g0  = [     0, 500000, 0.9996,  0, 129]
         },
 
         getTransCoord : (xy, fromType, toType) => {
@@ -33,7 +41,7 @@ let coordconv = function (x, y, fromType, toType) {
         },
         convertCoord : (xy, fromType, toType) => {
             let cxy = vCoordConv.from2bassel(xy, fromType) // 1 from to bessel
-            return vCoordConv.bassel2to(cxy, toType)     // 2 besell to to
+            return vCoordConv.bassel2to(cxy, toType)       // 2 bessel to to
         },
         from2bassel : (xy, fromType) => {
             if ( fromType == this.COORD_TM ) {
@@ -82,78 +90,71 @@ let coordconv = function (x, y, fromType, toType) {
             } else if ( toType == this.COORD_WGS84 ) {
                 return vCoordConv.convertBESSEL2WGS(xy);
             } else if ( toType == this.COORD_BESSEL ) {
-                // 이것에 bassel?
                 return xy
             }
         },
-        convertBESSEL2KTM : xy => {
-            return vCoordConv.GP2TM(xy, 6377397.155, 0.0033427731799399794, 600000, 400000, 0.9999, 38, 128);
-        },
-        convertBESSEL2CONG : xy => {
-            let cxy = vCoordConv.GP2TM(xy, 6377397.155, 0.0033427731799399794, 500000, 200000, 1, 38, 127.00289027777778);
-            return vCoordConv.shiftIsland(cxy, true);
-        },
-        convertBESSEL2WGS : xy => {
-            return vCoordConv.GP2WGP(xy, 0, 6377397.155, 0.0033427731799399794);
-        },
-        convertKTM2BESSEL : xy => {
-            return vCoordConv.TM2GP(xy, 6377397.155, 0.0033427731799399794, 600000, 400000, 0.9999, 38, 128);
+        convertTM2BESSEL : xy => {
+            return vCoordConv.TM2GP(xy, this.a6377397, this.g51);
         },
         convertBESSEL2TM : xy => {
-            return vCoordConv.GP2TM(xy, 6377397.155, 0.0033427731799399794, 500000, 200000, 1, 38, 127.0028902777777777776);
+            return vCoordConv.GP2TM(xy, this.a6377397, this.g51);
         },
-        convertTM2BESSEL : xy => {
-            return vCoordConv.TM2GP(xy, 6377397.155, 0.0033427731799399794, 500000, 200000, 1, 38, 127.0028902777777777776);
-        },
-        convertWGS2UTM : xy => {
-            return vCoordConv.GP2TM(xy, 6378137, 0.0033528106647474805, 0, 500000, 0.9996, 0, 129);
+        convertWTM2WGS : xy => { 
+            return vCoordConv.TM2GP(xy, this.a6378137, this.g52);
         },
         convertWGS2WTM : xy => {
-            return vCoordConv.GP2TM(xy, 6378137, 0.0033528106647474805, 500000, 200000, 1, 38, 127);
-        },
-        convertWGS2WKTM : xy => {
-            return vCoordConv.GP2TM(xy, 6378137, 0.0033528106647474805, 600000, 400000, 0.9999, 38, 128);
-        },
-        convertWGS2WCONG : xy => {
-            let cxy = vCoordConv.GP2TM(xy, 6378137, 0.0033528106647474805, 500000, 200000, 1, 38, 127);
-            return [ Math.round(cxy[0] * 2.5), Math.round(cxy[1] * 2.5) ];
-        },
-        convertUTM2WGS : xy => {
-            return vCoordConv.TM2GP(xy, 6378137, 0.0033528106647474805, 0, 500000, 0.9996, 0, 129);
-        },
-        convertWGS2BESSEL : xy => {
-            return vCoordConv.WGP2GP(xy, 0, 6377397.155, 0.0033427731799399794);
+            return vCoordConv.GP2TM(xy, this.a6378137, this.g52);
         },
         convertCONG2BESSEL : xy => {
             let cxy = vCoordConv.shiftIsland(xy, false);
-            return vCoordConv.TM2GP(cxy, 6377397.155, 0.0033427731799399794, 500000, 200000, 1, 38, 127.00289027777778);
+            return vCoordConv.TM2GP(cxy, this.a6377397, this.g51);
         },
-        convertWTM2WGS : xy => { 
-            return vCoordConv.TM2GP(xy, 6378137, 0.0033528106647474805, 500000, 200000, 1, 38, 127);
-        },
-        convertWKTM2WGS : xy => {
-            return vCoordConv.TM2GP(xy, 6378137, 0.0033528106647474805, 600000, 400000, 0.9999, 38, 128);
+        convertBESSEL2CONG : xy => {
+            let cxy = vCoordConv.GP2TM(xy, this.a6377397, this.g51);
+            return vCoordConv.shiftIsland(cxy, true);
         },
         convertWCONG2WGS : xy => {
-            xy = [ xy[0] / 2.5, xy[1] / 2.5 ];
-            return vCoordConv.TM2GP(xy, 6378137, 0.0033528106647474805, 500000, 200000, 1, 38, 127);
+            let cxy = [ xy[0] / 2.5, xy[1] / 2.5 ];
+            return vCoordConv.TM2GP(cxy, this.a6378137, this.g52);
         },
-        WGP2GP : (xy, d, e, h) => {
-            let rtn = vCoordConv.WGP2WCTR(xy, d);
-            rtn = vCoordConv.TransMolod(rtn[0], rtn[1], rtn[2]);
-            return vCoordConv.CTR2GP(rtn[0], rtn[1], rtn[2], e, h);
+        convertWGS2WCONG : xy => {
+            let cxy = vCoordConv.GP2TM(xy, this.a6378137, this.g52);
+            return [ Math.round(cxy[0] * 2.5), Math.round(cxy[1] * 2.5) ];
         },
-        WGP2WCTR : (xy, d) => {
-            return vCoordConv.GP2CTR(xy, d, 6378137, 0.0033528106647474805);
+        convertKTM2BESSEL : xy => {
+            return vCoordConv.TM2GP(xy, this.a6377397, this.g6);
         },
-        GP2WGP : (xy, d, e, h) => {
-            let rtn = vCoordConv.GP2CTR(xy, d, e, h);
+        convertBESSEL2KTM : xy => {
+            return vCoordConv.GP2TM(xy, this.a6377397, this.g6);
+        },
+        convertWKTM2WGS : xy => {
+            return vCoordConv.TM2GP(xy, this.a6378137, this.g6);
+        },
+        convertWGS2WKTM : xy => {
+            return vCoordConv.GP2TM(xy, this.a6378137, this.g6);
+        },
+        convertUTM2WGS : xy => {
+            return vCoordConv.TM2GP(xy, this.a6378137, this.g0);
+        },
+        convertWGS2UTM : xy => {
+            return vCoordConv.GP2TM(xy, this.a6378137, this.g0);
+        },
+        convertBESSEL2WGS : xy => {
+            let rtn = vCoordConv.GP2CTR(xy, this.a6377397);
             rtn = vCoordConv.InverseMolod(rtn[0], rtn[1], rtn[2]);
-            return vCoordConv.WCTR2WGP(rtn[0], rtn[1], rtn[2]);
+            return vCoordConv.CTR2GP(rtn[0], rtn[1], rtn[2], this.a6378137);
         },
-        GP2CTR : ( xy, d, e, h) => {
+        convertWGS2BESSEL : xy => {
+            let rtn = vCoordConv.GP2CTR(xy, this.a6378137);
+            rtn = vCoordConv.TransMolod(rtn[0], rtn[1], rtn[2]);
+            return vCoordConv.CTR2GP(rtn[0], rtn[1], rtn[2], this.a6377397);
+        },
+
+        GP2CTR : ( xy, eh ) => {
             let a = xy[1]
             let b = xy[0]
+            let e = eh[0]
+            let h = eh[1]
             let c = Math.atan(1) / 45
             let m = h;
             if ( m > 1 ) m = 1 / m;
@@ -164,9 +165,9 @@ let coordconv = function (x, y, fromType, toType) {
             let o = (Math.pow(e, 2) - Math.pow(m, 2)) / Math.pow(e, 2);
             o = e / Math.sqrt(1 - o * Math.pow(Math.sin(l), 2));
 
-            return  [ (o + d) * Math.cos(l) * Math.cos(c)
-                    , (o + d) * Math.cos(l) * Math.sin(c)
-                    , (Math.pow(m, 2) / Math.pow(e, 2) * o + d) * Math.sin(l) ]
+            return  [ o * Math.cos(l) * Math.cos(c)
+                    , o * Math.cos(l) * Math.sin(c)
+                    , (Math.pow(m, 2) / Math.pow(e, 2) * o) * Math.sin(l) ]
         },
         InverseMolod : ( a, b, d ) => {
             const m = Math.atan(1) / 45;
@@ -199,10 +200,9 @@ let coordconv = function (x, y, fromType, toType) {
                    , b + (1 + m_ds) * (-1 * m_kappa * a + m_omega * d) + m_dy
                    , d + (1 + m_ds) * (m_phi * a - m_omega * b) + m_dz ]
         },
-        WCTR2WGP : ( a, b, d ) => {
-            return vCoordConv.CTR2GP(a, b, d, 6378137, 0.0033528106647474805);
-        },
-        CTR2GP : ( a, b, d, e, h ) => {
+        CTR2GP : ( a, b, d, eh ) => {
+            let e = eh[0]
+            let h = eh[1]
             let m = h;
             if ( m > 1 ) m = 1 / m;
             let c = Math.atan(1) / 45
@@ -231,9 +231,16 @@ let coordconv = function (x, y, fromType, toType) {
             if ( rtn[0] < 0 ) rtn[0] += 360
             return rtn
         },
-        GP2TM : (xy, d, e, h, f, c, l, m) => {
+        GP2TM : (xy, de, hfclm) => {
+            let h = hfclm[0]
+            let f = hfclm[1]
+            let c = hfclm[2]
+            let l = hfclm[3]
+            let m = hfclm[4]
             let a = xy[1]
             let b = xy[0]
+            let d = de[0]
+            let e = de[1]
             let B = f;
             let w = e;
             if ( w > 1 ) w = 1 / w;
@@ -275,7 +282,14 @@ let coordconv = function (x, y, fromType, toType) {
             let x = B + D * o + Math.pow(D, 3) * z + Math.pow(D, 5) * w + Math.pow(D, 7) * u;
             return [ x, y ];
         },
-        TM2GP : ( xy, d, e, h, f, c, l, m) => {
+        TM2GP : ( xy, de, hfclm) => {
+            let h = hfclm[0]
+            let f = hfclm[1]
+            let c = hfclm[2]
+            let l = hfclm[3]
+            let m = hfclm[4]
+            let d = de[0]
+            let e = de[1]
             let u = e;
             let a = xy[1]
             let b = xy[0]
